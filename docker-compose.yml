@@ -1,0 +1,38 @@
+version: '3'
+
+services: 
+    nginx:
+        build: ./build/nginx
+        container_name: nginx
+        tty: true
+        links: 
+            - php
+        ports: 
+            - "80:80"
+        volumes:
+            - "./etc/nginx/conf.d:/etc/nginx/conf.d:ro"
+            - "/www/nginx/html:/usr/share/nginx/html:ro"
+            - "/www:/www"
+    php: 
+        build: ./build/php
+        container_name: php
+        links: 
+            - "mysql"
+        volumes: 
+            - "./etc/php:/usr/local/etc/php"
+            - "./etc/php/conf.d:/usr/local/etc/php/conf.d"
+            - "/www:/www"
+    mysql:
+        build: ./build/mysql
+        container_name: mysql
+        tty: true
+        env_file:
+            - mysql.env
+        ports:
+            - "3306:3306"
+        # 这里的uid对应host机的mysql用户的uid，如果mysql用户不存在，请先创建
+        user: '501'
+        volumes:
+            - "./data/mysql:/var/lib/mysql"
+            - "./etc/mysql/my.cnf:/etc/mysql/my.cnf"
+            - "./etc/mysql/conf.d:/etc/mysql/conf.d"
